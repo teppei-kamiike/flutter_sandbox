@@ -1,7 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_sample/auth_gate.dart';
+import 'package:firebase_sample/constants/auth_gate_label.dart';
 import 'package:firebase_sample/firebase_options.dart';
 import 'package:flutter/material.dart';
+import 'package:flutterfire_ui/i10n.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,11 +17,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Flutter Demo',
+        title: 'Firebase Sample',
         theme: ThemeData(
           useMaterial3: true,
           colorSchemeSeed: Colors.blue,
         ),
+        localizationsDelegates: [
+          FlutterFireUILocalizations.withDefaultOverrides(const AuthGateLabel())
+        ],
         home: const AuthGate());
   }
 }
