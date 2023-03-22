@@ -20,6 +20,7 @@ class _AuthGateState extends State<AuthGate> {
             return const SignInScreen(
               providerConfigs: [
                 EmailProviderConfiguration(),
+                GoogleProviderConfiguration(clientId: '')
               ],
             );
           }
