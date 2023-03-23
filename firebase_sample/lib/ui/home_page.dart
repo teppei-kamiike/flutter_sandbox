@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_sample/entity/user.dart' as app_user;
 import 'package:flutter/material.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -22,6 +25,30 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: FutureBuilder(
+          future: FirebaseFirestore.instance
+              .collection('users')
+              .doc(FirebaseAuth.instance.currentUser!.uid)
+              .get(),
+          builder: (BuildContext context,
+              AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
+            if (snapshot.hasData) {
+              final json = snapshot.data!.data();
+              if (json != null) {
+                app_user.User user = app_user.User.fromJson(json);
+                return CircleAvatar(
+                  backgroundImage: user.iconDownloadUrl != null
+                      ? NetworkImage(user.iconDownloadUrl!)
+                      : null,
+                  child: user.iconDownloadUrl == null
+                      ? const Text('No image')
+                      : null,
+                );
+              }
+            }
+            return const SizedBox.shrink();
+          },
+        ),
         title: Text(widget.title),
       ),
       body: Center(

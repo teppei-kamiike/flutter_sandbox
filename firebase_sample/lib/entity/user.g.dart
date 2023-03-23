@@ -8,8 +8,10 @@ part of 'user.dart';
 
 User _$UserFromJson(Map<String, dynamic> json) => User(
       nickname: json['nickname'] as String,
+      iconDownloadUrl: json['iconDownloadUrl'] as String?,
     );
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'nickname': instance.nickname,
+      'iconDownloadUrl': instance.iconDownloadUrl,
     };

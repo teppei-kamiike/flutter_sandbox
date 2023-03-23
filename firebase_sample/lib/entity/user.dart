@@ -6,7 +6,9 @@ part 'user.g.dart';
 class User {
   final String nickname;
 
-  User({required this.nickname});
+  final String? iconDownloadUrl;
+
+  User({required this.nickname, this.iconDownloadUrl});
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
