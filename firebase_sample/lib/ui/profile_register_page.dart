@@ -20,6 +20,7 @@ class _ProfileRegisterPageState extends State<ProfileRegisterPage> {
   File? _icon;
   String? _iconDownloadUrl;
   late final FocusNode _entireFocusNode;
+  bool _inputEnable = true;
 
   @override
   void initState() {
@@ -82,24 +83,28 @@ class _ProfileRegisterPageState extends State<ProfileRegisterPage> {
                   ),
                   _icon == null
                       ? OutlinedButton(
-                          onPressed: () async {
-                            _unfocusNickname();
-                            final XFile? pickedIcon = await _imagePicker
-                                .pickImage(source: ImageSource.gallery);
-                            if (pickedIcon == null) return;
-                            setState(() {
-                              _icon = File(pickedIcon.path);
-                            });
-                          },
+                          onPressed: _inputEnable
+                              ? () async {
+                                  _unfocusNickname();
+                                  final XFile? pickedIcon = await _imagePicker
+                                      .pickImage(source: ImageSource.gallery);
+                                  if (pickedIcon == null) return;
+                                  setState(() {
+                                    _icon = File(pickedIcon.path);
+                                  });
+                                }
+                              : null,
                           child: const Text('画像をアップロード'),
                         )
                       : OutlinedButton(
-                          onPressed: () {
-                            _unfocusNickname();
-                            setState(() {
-                              _icon = null;
-                            });
-                          },
+                          onPressed: _inputEnable
+                              ? () {
+                                  _unfocusNickname();
+                                  setState(() {
+                                    _icon = null;
+                                  });
+                                }
+                              : null,
                           child: const Text('削除'),
                         ),
                 ],
@@ -113,21 +118,31 @@ class _ProfileRegisterPageState extends State<ProfileRegisterPage> {
                 onChanged: (value) {
                   _nickname = value;
                 },
+                enabled: _inputEnable,
                 maxLength: 12,
               ),
               const SizedBox(
                 height: 20,
               ),
               FilledButton(
-                  style:
-                      FilledButton.styleFrom(minimumSize: const Size(240, 48)),
-                  onPressed: () async {
-                    _unfocusNickname();
-                    await _uploadIconFile();
-                    _addUser().then(
-                        (_) => Navigator.popAndPushNamed(context, '/home'));
-                  },
-                  child: const Text('登録'))
+                style: FilledButton.styleFrom(minimumSize: const Size(240, 48)),
+                onPressed: _inputEnable
+                    ? () async {
+                        _unfocusNickname();
+                        _inputEnable = false;
+
+                        await _uploadIconFile();
+                        _addUser().then(
+                          (_) => Navigator.popAndPushNamed(context, '/home'),
+                        );
+                      }
+                    : null,
+                child: _inputEnable
+                    ? const Text('登録')
+                    : const CircularProgressIndicator(
+                        strokeWidth: 2.0,
+                      ),
+              )
             ],
           ),
         ),
