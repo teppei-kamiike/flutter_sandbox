@@ -18,7 +18,20 @@ class _ProfileRegisterPageState extends State<ProfileRegisterPage> {
   String _nickname = '';
   final ImagePicker _imagePicker = ImagePicker();
   File? _icon;
-  late final String _iconDownloadUrl;
+  String? _iconDownloadUrl;
+  late final FocusNode _entireFocusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _entireFocusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    _entireFocusNode.dispose();
+    super.dispose();
+  }
 
   Future<void> _uploadIconFile() async {
     if (_icon == null) return;
@@ -37,70 +50,86 @@ class _ProfileRegisterPageState extends State<ProfileRegisterPage> {
             .toJson());
   }
 
+  void _unfocusNickname() {
+    final FocusScopeNode currentScope = FocusScope.of(context);
+    if (!currentScope.hasPrimaryFocus && currentScope.hasFocus) {
+      FocusManager.instance.primaryFocus!.unfocus();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('プロフィール登録'),
-      ),
-      body: Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  backgroundImage: _icon != null ? FileImage(_icon!) : null,
-                  radius: 40,
-                  child: _icon == null ? const Text('No image') : null,
-                ),
-                const SizedBox(
-                  width: 12,
-                ),
-                _icon == null
-                    ? OutlinedButton(
-                        onPressed: () async {
-                          final XFile? pickedIcon = await _imagePicker
-                              .pickImage(source: ImageSource.gallery);
-                          if (pickedIcon == null) return;
-                          setState(() {
-                            _icon = File(pickedIcon.path);
-                          });
-                        },
-                        child: const Text('画像をアップロード'),
-                      )
-                    : OutlinedButton(
-                        onPressed: () {
-                          setState(() {
-                            _icon = null;
-                          });
-                        },
-                        child: const Text('削除')),
-              ],
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            TextField(
-              decoration: const InputDecoration(
-                  border: OutlineInputBorder(), labelText: 'ニックネーム'),
-              onChanged: (value) {
-                _nickname = value;
-              },
-              maxLength: 12,
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            FilledButton(
-                style: FilledButton.styleFrom(minimumSize: const Size(240, 48)),
-                onPressed: () async {
-                  await _uploadIconFile();
-                  _addUser()
-                      .then((_) => Navigator.popAndPushNamed(context, '/home'));
+    return GestureDetector(
+      behavior: HitTestBehavior.deferToChild,
+      onTap: _unfocusNickname,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('プロフィール登録'),
+        ),
+        body: Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  CircleAvatar(
+                    backgroundImage: _icon != null ? FileImage(_icon!) : null,
+                    radius: 40,
+                    child: _icon == null ? const Text('No image') : null,
+                  ),
+                  const SizedBox(
+                    width: 12,
+                  ),
+                  _icon == null
+                      ? OutlinedButton(
+                          onPressed: () async {
+                            _unfocusNickname();
+                            final XFile? pickedIcon = await _imagePicker
+                                .pickImage(source: ImageSource.gallery);
+                            if (pickedIcon == null) return;
+                            setState(() {
+                              _icon = File(pickedIcon.path);
+                            });
+                          },
+                          child: const Text('画像をアップロード'),
+                        )
+                      : OutlinedButton(
+                          onPressed: () {
+                            _unfocusNickname();
+                            setState(() {
+                              _icon = null;
+                            });
+                          },
+                          child: const Text('削除'),
+                        ),
+                ],
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              TextField(
+                decoration: const InputDecoration(
+                    border: OutlineInputBorder(), labelText: 'ニックネーム'),
+                onChanged: (value) {
+                  _nickname = value;
                 },
-                child: const Text('登録'))
-          ],
+                maxLength: 12,
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              FilledButton(
+                  style:
+                      FilledButton.styleFrom(minimumSize: const Size(240, 48)),
+                  onPressed: () async {
+                    _unfocusNickname();
+                    await _uploadIconFile();
+                    _addUser().then(
+                        (_) => Navigator.popAndPushNamed(context, '/home'));
+                  },
+                  child: const Text('登録'))
+            ],
+          ),
         ),
       ),
     );
