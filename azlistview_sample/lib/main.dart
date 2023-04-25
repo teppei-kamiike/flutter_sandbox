@@ -1,4 +1,9 @@
+import 'dart:convert';
+
+import 'package:azlistview/azlistview.dart';
+import 'package:azlistview_sample/azlist/model/item.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,12 +34,35 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  List<Item> itemList = [];
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
+  @override
+  void initState() {
+    super.initState();
+    loadData();
+  }
+
+  void loadData() async {
+    rootBundle.loadString('assets/itemList.json').then((value) {
+      final List jsonMap = json.decode(value);
+      for (var e in jsonMap) {
+        itemList.add(Item.fromJson(e));
+      }
+      setSuspentionTag(itemList);
+      setState(() {});
     });
+  }
+
+  void setSuspentionTag(List<Item> list) {
+    if (list.isEmpty) return;
+    for (int i = 0; i < list.length; i++) {
+      String tag = list[i].name.substring(0, 1).toUpperCase();
+      if (RegExp('[A-Z]').hasMatch(tag)) {
+        list[i].suspentionTag = tag;
+      } else {
+        list[i].suspentionTag = "#";
+      }
+    }
   }
 
   @override
@@ -43,24 +71,13 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+      body: AzListView(
+        data: itemList,
+        itemCount: itemList.length,
+        itemBuilder: (context, index) {
+          return ListTile(title: Text(itemList[index].name));
+        },
+        indexBarWidth: 64,
       ),
     );
   }
